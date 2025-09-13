@@ -1,3 +1,5 @@
+import { Timestamp } from "firebase/firestore";
+
 export interface Doctor {
   id: string;
   name: string;
@@ -10,17 +12,12 @@ export interface Doctor {
   profileImage: string;
   bio: string;
   clinic: {
-    name: string;
+    name: string; // This will be the workplace
     address: string;
     city: string;
-    coordinates: {
-      lat: number;
-      lng: number;
-    };
   };
   availability: TimeSlot[];
-  registrationNumber: string;
-  professionalMemberships: string[];
+  skills?: string[]; // <-- ADDED SKILLS FIELD
 }
 
 export interface TimeSlot {
@@ -41,13 +38,15 @@ export interface Patient {
 export interface Appointment {
   id: string;
   doctorId: string;
+  doctorName: string;
+  doctorSpecialty: string;
   patientId: string;
+  patientName: string;
   date: string;
   time: string;
-  status: 'scheduled' | 'completed' | 'cancelled' | 'no-show';
-  type: 'consultation' | 'follow-up' | 'emergency';
-  notes?: string;
+  status: 'scheduled' | 'completed' | 'cancelled';
   fee: number;
+  createdAt: Timestamp;
 }
 
 export interface Review {

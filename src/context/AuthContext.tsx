@@ -1,13 +1,23 @@
-import React, { createContext, useContext, useState, ReactNode } from 'react';
-import { Patient } from '../types';
-import { mockPatients } from '../data/mockData';
+import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import {
+  Auth,
+  User,
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  onAuthStateChanged,
+  signOut,
+  updateProfile,
+} from 'firebase/auth';
+import { auth, db } from '../firebaseConfig'; // Assuming you have this file
+import { doc, setDoc } from 'firebase/firestore';
 
 interface AuthContextType {
-  user: Patient | null;
+  user: User | null;
   userType: 'patient' | 'doctor' | null;
-  login: (email: string, password: string, type: 'patient' | 'doctor') => Promise<boolean>;
-  logout: () => void;
-  register: (userData: Partial<Patient>, type: 'patient' | 'doctor') => Promise<boolean>;
+  loading: boolean;
+  login: (email: string, password: string) => Promise<boolean>;
+  logout: () => Promise<void>;
+  register: (name: string, email: string, password: string, type: 'patient' | 'doctor') => Promise<boolean>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -25,48 +35,80 @@ interface AuthProviderProps {
 }
 
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
-  const [user, setUser] = useState<Patient | null>(null);
+  const [user, setUser] = useState<User | null>(null);
   const [userType, setUserType] = useState<'patient' | 'doctor' | null>(null);
+  const [loading, setLoading] = useState(true);
 
-  const login = async (email: string, password: string, type: 'patient' | 'doctor'): Promise<boolean> => {
-    // Mock authentication
-    if (type === 'patient') {
-      const patient = mockPatients.find(p => p.email === email);
-      if (patient) {
-        setUser(patient);
-        setUserType('patient');
-        return true;
-      }
-    }
-    return false;
-  };
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+      setUser(currentUser);
+      // In a real app, you would fetch the userType from your database (e.g., Firestore)
+      // For now, we'll leave it null on initial load
+      setLoading(false);
+    });
 
-  const logout = () => {
-    setUser(null);
-    setUserType(null);
-  };
+    return () => unsubscribe();
+  }, []);
 
-  const register = async (userData: Partial<Patient>, type: 'patient' | 'doctor'): Promise<boolean> => {
-    // Mock registration
-    if (type === 'patient') {
-      const newPatient: Patient = {
-        id: `patient-${Date.now()}`,
-        name: userData.name || '',
-        email: userData.email || '',
-        phone: userData.phone || '',
-        dateOfBirth: userData.dateOfBirth || '',
-        gender: userData.gender || 'other'
-      };
-      setUser(newPatient);
-      setUserType('patient');
+  const login = async (email: string, password: string): Promise<boolean> => {
+    try {
+      await signInWithEmailAndPassword(auth, email, password);
+      // You might want to fetch userType from Firestore here
       return true;
+    } catch (error) {
+      console.error("Login error:", error);
+      return false;
     }
-    return false;
+  };
+
+  const logout = async (): Promise<void> => {
+    try {
+      await signOut(auth);
+      setUser(null);
+      setUserType(null);
+    } catch (error) {
+        console.error("Logout error:", error);
+    }
+  };
+
+  const register = async (name: string, email: string, password: string, type: 'patient' | 'doctor'): Promise<boolean> => {
+    try {
+      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+      const newUser = userCredential.user;
+
+      // Update the user's profile with their name
+      await updateProfile(newUser, { displayName: name });
+      
+      // Save user role in Firestore
+      await setDoc(doc(db, "users", newUser.uid), {
+        uid: newUser.uid,
+        name,
+        email,
+        role: type,
+        createdAt: new Date(),
+      });
+
+      setUser({ ...newUser, displayName: name }); // Update local user state
+      setUserType(type);
+      return true;
+    } catch (error) {
+      console.error("Registration error:", error);
+      return false;
+    }
+  };
+
+  const value = {
+    user,
+    userType,
+    loading,
+    login,
+    logout,
+    register,
   };
 
   return (
-    <AuthContext.Provider value={{ user, userType, login, logout, register }}>
-      {children}
+    <AuthContext.Provider value={value}>
+      {!loading && children}
     </AuthContext.Provider>
   );
 };

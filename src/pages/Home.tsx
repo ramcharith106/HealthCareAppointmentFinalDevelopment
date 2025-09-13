@@ -9,10 +9,14 @@ import {
   Heart, 
   Shield,
   Award,
-  MapPin
+  MapPin,
+  Database
 } from 'lucide-react';
 import SearchBar from '../components/UI/SearchBar';
 import { mockDoctors } from '../data/mockData';
+
+// Import the seeding function
+import { seedDoctorsCollection } from '@/utils/seedDatabase';
 
 const Home: React.FC = () => {
   const [showFilters, setShowFilters] = useState(false);
@@ -45,6 +49,20 @@ const Home: React.FC = () => {
 
   return (
     <div className="min-h-screen">
+      {/* ===== TEMPORARY SEED BUTTON ===== */}
+      <div className="bg-yellow-200 text-center p-4">
+        <p className="font-semibold text-yellow-800">Developer Action Required:</p>
+        <button
+          onClick={seedDoctorsCollection}
+          className="mt-2 bg-green-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-green-700 flex items-center justify-center mx-auto"
+        >
+          <Database className="h-5 w-5 mr-2" />
+          Click Here Once to Add Doctors to Database
+        </button>
+        <p className="text-xs text-yellow-700 mt-1">After clicking, you can remove this button from Home.tsx</p>
+      </div>
+      {/* =================================== */}
+
       {/* Hero Section */}
       <section className="relative bg-gradient-to-br from-blue-600 via-blue-700 to-indigo-800 text-white">
         <div className="absolute inset-0 bg-black opacity-20"></div>
