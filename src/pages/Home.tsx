@@ -9,28 +9,26 @@ import {
   Heart, 
   Shield,
   Award,
-  MapPin,
-  Database
+  MapPin
 } from 'lucide-react';
 import SearchBar from '../components/UI/SearchBar';
 import { mockDoctors } from '../data/mockData';
-
-// Import the seeding function
-import { seedDoctorsCollection } from '@/utils/seedDatabase';
 
 const Home: React.FC = () => {
   const [showFilters, setShowFilters] = useState(false);
 
   const handleSearch = (query: string, location: string) => {
     console.log('Search:', query, location);
-    // Implement search logic
+    // This can be connected to the navigate function to redirect to the doctors list with search params
   };
 
   const handleFilterToggle = () => {
     setShowFilters(!showFilters);
   };
 
+  // Featured doctors can now be fetched from your database in the future
   const featuredDoctors = mockDoctors.slice(0, 6);
+  
   const specialties = [
     { name: 'Cardiology', icon: Heart, color: 'bg-red-100 text-red-600' },
     { name: 'Dermatology', icon: Star, color: 'bg-yellow-100 text-yellow-600' },
@@ -41,28 +39,14 @@ const Home: React.FC = () => {
   ];
 
   const stats = [
-    { label: 'Doctors', value: '1000+', icon: Users },
+    { label: 'Verified Doctors', value: '50+', icon: Users },
     { label: 'Appointments Booked', value: '50K+', icon: Calendar },
     { label: 'Happy Patients', value: '25K+', icon: Star },
-    { label: 'Cities', value: '50+', icon: MapPin }
+    { label: 'Cities Served', value: '10+', icon: MapPin }
   ];
 
   return (
     <div className="min-h-screen">
-      {/* ===== TEMPORARY SEED BUTTON ===== */}
-      <div className="bg-yellow-200 text-center p-4">
-        <p className="font-semibold text-yellow-800">Developer Action Required:</p>
-        <button
-          onClick={seedDoctorsCollection}
-          className="mt-2 bg-green-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-green-700 flex items-center justify-center mx-auto"
-        >
-          <Database className="h-5 w-5 mr-2" />
-          Click Here Once to Add Doctors to Database
-        </button>
-        <p className="text-xs text-yellow-700 mt-1">After clicking, you can remove this button from Home.tsx</p>
-      </div>
-      {/* =================================== */}
-
       {/* Hero Section */}
       <section className="relative bg-gradient-to-br from-blue-600 via-blue-700 to-indigo-800 text-white">
         <div className="absolute inset-0 bg-black opacity-20"></div>
