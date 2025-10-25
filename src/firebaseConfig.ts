@@ -7,7 +7,7 @@ const firebaseConfig = {
   apiKey: "AIzaSyBZOmK0pgr8y49YTIusnVOREFjzcDdv2Ag",
   authDomain: "healthconnect-6b838.firebaseapp.com",
   projectId: "healthconnect-6b838",
-  storageBucket: "healthconnect-6b838.appspot.com",
+  storageBucket: "healthconnect-6b838.firebasestorage.app",
   messagingSenderId: "996319029824",
   appId: "1:996319029824:web:f4c2a6d344966a6efacda5"
 };
